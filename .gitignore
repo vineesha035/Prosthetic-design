@@ -1,0 +1,10 @@
+frontend/my-actor/venv/
+__pycache__/
+*.pyc
+frontend/mcp/node_modules/
+frontend/mastra/node_modules/
+.env
+.env.local
+*.glb
+.DS_Store
+Thumbs.db

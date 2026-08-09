@@ -1,22 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import path from "path";
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: Request): Promise<Response> {
   const body = await req.json();
   const { color, pattern, theme, manufacturer } = body;
 
-  console.log("🎨 Received design request:", body);
-
-  const mcpScriptPath = path.join(
-    process.cwd(),
-    "mcp",
-    "index.js"
-  );
-
+  const mcpScriptPath = path.join(process.cwd(), "mcp", "index.js");
   const command = `node ${mcpScriptPath}`;
 
-  return new Promise<NextResponse>((resolve) => {
+  return new Promise<Response>((resolve) => {
     exec(
       command,
       {
@@ -26,13 +19,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           DESIGN_PATTERN: pattern,
           DESIGN_THEME: theme,
           DESIGN_MANUFACTURER: manufacturer,
-          ARCADE_API_KEY: process.env.ARCADE_API_KEY,
-          SENDER_EMAIL: process.env.SENDER_EMAIL,
         },
       },
-      (error, stdout, stderr) => {
+      (error, stdout) => {
         if (error) {
-          console.error("Pipeline error:", error);
           resolve(
             NextResponse.json(
               { success: false, error: error.message },
@@ -41,7 +31,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
           return;
         }
-        console.log("Pipeline output:", stdout);
         resolve(
           NextResponse.json({
             success: true,

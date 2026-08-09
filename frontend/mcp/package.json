@@ -1,0 +1,27 @@
+{
+  "name": "mcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@arcadeai/arcadejs": "^2.4.1",
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.13.23",
+    "@mastra/core": "^1.52.1",
+    "dotenv": "^16.6.1",
+    "node-fetch": "^3.3.2",
+    "replicate": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  }
+}

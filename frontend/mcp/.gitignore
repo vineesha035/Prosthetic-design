@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.local
+frontend/my-actor/venv/
+*.png
+__pycache__/
+.next/

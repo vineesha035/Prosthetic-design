@@ -1,15 +1,14 @@
-import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import path from "path";
 
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: Request) {
   const body = await req.json();
   const { color, pattern, theme, manufacturer } = body;
 
   const mcpScriptPath = path.join(process.cwd(), "mcp", "index.js");
   const command = `node ${mcpScriptPath}`;
 
-  return new Promise<Response>((resolve) => {
+  return new Promise((resolve) => {
     exec(
       command,
       {
@@ -24,7 +23,7 @@ export async function POST(req: Request): Promise<Response> {
       (error, stdout) => {
         if (error) {
           resolve(
-            NextResponse.json(
+            Response.json(
               { success: false, error: error.message },
               { status: 500 }
             )
@@ -32,7 +31,7 @@ export async function POST(req: Request): Promise<Response> {
           return;
         }
         resolve(
-          NextResponse.json({
+          Response.json({
             success: true,
             message: `Design sent to ${manufacturer}!`,
             output: stdout,

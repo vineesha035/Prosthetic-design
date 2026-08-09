@@ -164,6 +164,26 @@ export default function Home() {
         {status && (
           <p className="mt-4 text-sm text-center text-gray-300">{status}</p>
         )}
+
+        {/* Generated Image */}
+        {imageUrl && (
+          <div className="mt-6 flex flex-col items-center">
+            <p className="text-sm text-gray-400 mb-3">Your Generated Design:</p>
+            <img
+              src={imageUrl}
+              alt="Generated prosthetic design"
+              className="rounded-xl w-full border border-gray-700 shadow-lg"
+            />
+            
+              href={imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 text-blue-400 text-sm hover:underline"
+            >
+              View full size →
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

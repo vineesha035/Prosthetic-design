@@ -2,23 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { exec } from "child_process";
 import path from "path";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const body = await req.json();
   const { color, pattern, theme, manufacturer } = body;
 
   console.log("🎨 Received design request:", body);
 
-  // Path to the MCP pipeline script
   const mcpScriptPath = path.join(
-  process.cwd(),
-  "mcp",
-  "index.js"
-);
+    process.cwd(),
+    "mcp",
+    "index.js"
+  );
 
-  // Build the command with preferences as environment variables
   const command = `node ${mcpScriptPath}`;
 
-  return new Promise((resolve) => {
+  return new Promise<NextResponse>((resolve) => {
     exec(
       command,
       {

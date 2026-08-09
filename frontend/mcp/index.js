@@ -68,19 +68,87 @@ async function generateDesignWithReplicate(prompt) {
     return "image-generation-failed";
   }
 }
-async function sendEmailViaArcade(prefs, imageUrl, toEmail) {
-  const subject = `New Prosthetic Design Request - ${prefs.color} ${prefs.pattern}`;
-  const body = `Hello ${prefs.manufacturer} Team,
+async function generateGLBModel(color) {
+  console.log(`   🦾 Generating GLB 3D model for color: ${color}...`);
+  
+  const { exec } = require("child_process");
+  const path = require("path");
+  
+  const pythonScript = path.join(
+    __dirname,
+    "..",
+    "my-actor",
+    "src",
+    "generate_glb.py"
+  );
+  
+  const glbOutput = path.join(__dirname, "exported.glb");
 
-A new personalized prosthetic leg design has been generated and is ready for production.
+  return new Promise((resolve, reject) => {
+    exec(
+      `python ${pythonScript}`,
+      {
+        env: {
+          ...process.env,
+          DESIGN_COLOR: color,
+          GLB_OUTPUT: glbOutput,
+        },
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`   ❌ GLB generation error: ${error.message}`);
+          resolve(null);
+          return;
+        }
+        console.log(`   ✅ GLB model generated!`);
+        console.log(stdout);
+        resolve(glbOutput);
+      }
+    );
+  });
+}
+async function runDesignPipeline(prefs) {
+  console.log("🚀 Starting Design Pipeline...");
+  console.log("🎨 Preferences received:", prefs);
+
+  const prompt = buildVizcomPrompt(prefs);
+  console.log(`📝 Prompt: ${prompt}`);
+
+  // Generate AI image
+  console.log("🤖 Generating AI image...");
+  const imageUrl = await generateDesignWithReplicate(prompt);
+  console.log(`✅ Image: ${imageUrl}`);
+
+  // Generate GLB model
+  console.log("🦾 Generating 3D GLB model...");
+  const glbPath = await generateGLBModel(prefs.color);
+
+  // Send email
+  const manufacturerEmail = MANUFACTURER_EMAILS[prefs.manufacturer];
+  console.log(`📧 Sending email to ${prefs.manufacturer}...`);
+  await sendEmailViaArcade(prefs, imageUrl, glbPath, manufacturerEmail);
+  console.log("✅ Done!");
+
+  return {
+    success: true,
+    prompt,
+    imageUrl,
+    glbPath,
+    message: `Design sent to ${prefs.manufacturer}!`,
+  };
+}
+async function sendEmailViaArcade(prefs, imageUrl, glbPath, toEmail){
+  const subject = `New Prosthetic Design Request - ${prefs.color} ${prefs.pattern}`;
+ const body = `Hello ${prefs.manufacturer} Team,
+
+A new personalized prosthetic leg design is ready for production.
 
 Design Specifications:
 - Color Scheme: ${prefs.color}
 - Pattern: ${prefs.pattern}
 - Theme: ${prefs.theme}
-- Generated Design: ${imageUrl}
-
-Please review the design at the link above and proceed with manufacturing.
+- View AI Design: ${imageUrl}
+- 3D Model File: ${glbPath ? "Generated and ready for download" : "Pending"}
 
 Best regards,
 Prosthetic Design Studio`;

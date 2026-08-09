@@ -120,8 +120,8 @@ async function runDesignPipeline(prefs) {
   console.log(`✅ Image: ${imageUrl}`);
 
   // Generate GLB model
-  console.log("🦾 Generating 3D GLB model...");
-  const glbPath = await generateGLBModel(prefs.color);
+ const glbPath = null;
+console.log("   GLB generation skipped in cloud deployment");
 
   // Send email
   const manufacturerEmail = MANUFACTURER_EMAILS[prefs.manufacturer];

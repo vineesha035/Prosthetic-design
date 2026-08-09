@@ -43,10 +43,12 @@ export default function Home() {
   const [manufacturer, setManufacturer] = useState(MANUFACTURER_OPTIONS[0]);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
   const handleSubmit = async () => {
   setLoading(true);
-  setStatus("🎨 Generating your design...");
+  setStatus("Generating your design...");
+  setImageUrl("");
 
   try {
     const response = await fetch("/api/generate", {
@@ -58,7 +60,8 @@ export default function Home() {
     const data = await response.json();
 
     if (data.success) {
-      setStatus(`✅ Design sent to ${manufacturer}! Check their email.`);
+      setStatus(`Design sent to ${manufacturer}!`);
+      setImageUrl(data.imageUrl);
     } else {
       setStatus(`❌ Something went wrong: ${data.error}`);
     }

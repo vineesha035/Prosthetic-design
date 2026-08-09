@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prosthetic Design Studio
 
-## Getting Started
+**Live Demo:** [prosthetic-design.vercel.app](https://prosthetic-design.vercel.app)
 
-First, run the development server:
+> Personalized prosthetics, powered by style. Design a prosthetic leg that feels like **you**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Inspiration
+
+A close friend of mine needed a prosthetic leg. He wanted something that made him feel happy and reflected his personality, but struggled to find any company offering real customization. That experience stuck with me — and became the foundation of this project. I built this as a class project to explore how AI, browser automation, and modern web development could come together to solve a real accessibility problem.
+
+---
+
+## Why This Project Matters
+
+Prosthetic limbs are life-changing devices — but for most people, they come in a single standard design with little room for personalization. This matters for several reasons:
+
+- **Psychological wellbeing** — Studies show that patients who feel a personal connection to their prosthetic are more likely to use it consistently and report higher quality of life.
+- **Identity and self-expression** — A prosthetic leg is visible to the world every day. Being able to customize it to match a person's personality, culture, or style can make a meaningful difference.
+- **Accessibility of customization** — Currently, custom prosthetic designs require expensive consultations with specialists. This app democratizes the process by letting anyone design their own in minutes.
+- **Faster manufacturer communication** — Instead of back-and-forth emails, the app automatically sends a complete design brief directly to the manufacturer, cutting down production time.
+
+---
+
+## How It Is Useful
+
+| Who uses it | How it helps |
+|---|---|
+| **Patients** | Design a prosthetic that reflects their personality without needing design expertise |
+| **Prosthetists** | Receive clear, structured design briefs from patients automatically |
+| **Manufacturers** | Get AI-generated design specs and images directly in their inbox |
+| **Healthcare providers** | Offer patients a modern, engaging customization experience |
+
+---
+
+## What It Does
+
+Prosthetic Design Studio is a full-stack web application where users pick their style preferences — color scheme, pattern, and theme — and the app:
+
+1. Generates a personalized AI image of their prosthetic leg design
+2. Shows the generated design directly on screen
+3. Automatically emails the design to a selected prosthetics manufacturer
+
+---
+
+## System Architecture
+
+```
+┌─────────────┐        ┌──────────────────┐        ┌──────────────────┐
+│   Frontend  │──────▶ │  Next.js API     │──────▶ │  Pollinations.ai │
+│  (Next.js)  │ prefs  │  Route Handler   │        │  (AI Image Gen)  │
+└─────────────┘        └──────────────────┘        └──────────────────┘
+                                │
+                                ▼
+                       ┌──────────────────┐        ┌──────────────────┐
+                       │   Mastra MCP     │──────▶ │   Arcade.dev     │
+                       │  Orchestration   │        │  Gmail Email     │
+                       └──────────────────┘        └──────────────────┘
+                                │
+                                ▼
+                       ┌──────────────────┐        ┌──────────────────┐
+                       │  Apify Actor     │──────▶ │  Vizcom AI       │
+                       │  (Playwright)    │        │  (Browser Auto)  │
+                       └──────────────────┘        └──────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Frontend (Next.js + Tailwind CSS)
+A dark-themed web UI with 4 dropdowns — Color Scheme, Pattern, Theme, and Manufacturer. When the user clicks Generate, preferences are sent to a Next.js serverless API route.
 
-## Learn More
+### 2. AI Image Generation (Pollinations.ai)
+A text prompt is built from the user's selections and sent to Pollinations.ai to generate a photorealistic AI image of the styled prosthetic leg. Pollinations is completely free with no API key needed.
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Mastra MCP Orchestration
+Mastra coordinates the pipeline steps — image generation, 3D model creation, and email delivery — in sequence as an agentic workflow.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. 3D GLB Model Generation (Python + trimesh)
+A Python script uses the trimesh library to programmatically generate a `.glb` 3D model file of the prosthetic with the user's chosen color applied. This gives manufacturers a production-ready file format.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 5. Vizcom Browser Automation (Playwright + Apify)
+Since Vizcom has no public API, the UI was reverse-engineered and a headless Playwright script automatically logs in, uploads the base leg image to the canvas, types the style prompt, and triggers AI rendering. This script is deployed as an Apify Actor on the cloud.
 
-## Deploy on Vercel
+### 6. Email Delivery (Arcade.dev)
+Once the design is ready, Arcade.dev's Gmail integration automatically emails the generated design image and specifications to the selected manufacturer.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16, TypeScript, Tailwind CSS v4 |
+| AI Image Generation | Pollinations.ai |
+| Orchestration | Mastra MCP (Node.js) |
+| Browser Automation | Python + Playwright + Apify SDK |
+| 3D Model Generation | Python + trimesh |
+| Email Delivery | Arcade.dev (Gmail integration) |
+| Deployment | Vercel + Apify Cloud |
+| Version Control | GitHub |
+
+---
+
+## Project Structure
+
+```
+prosthetic-design/
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx              ← Main UI (dropdowns + image display)
+│   │   └── api/generate/
+│   │       └── route.ts          ← Serverless API route
+│   ├── mcp/
+│   │   └── index.js              ← Mastra MCP pipeline
+│   ├── mastra/
+│   │   └── index.js              ← Mastra agent setup
+│   └── my-actor/
+│       └── src/
+│           ├── main.py           ← Playwright Vizcom automation
+│           └── generate_glb.py   ← Python 3D model generator
+└── README.md
+```
+
+---
+
+## Running Locally
+
+### Prerequisites
+- Node.js >= 18
+- Python >= 3.11
+- Apify CLI: `npm install -g apify-cli`
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/vineesha035/Prosthetic-design.git
+cd Prosthetic-design
+```
+
+### 2. Install frontend dependencies
+```bash
+cd frontend
+npm install
+```
+
+### 3. Set up environment variables
+Create `frontend/.env.local`:
+```dotenv
+ARCADE_API_KEY=your_arcade_api_key
+SENDER_EMAIL=your_email@gmail.com
+```
+
+### 4. Set up Python environment
+```bash
+cd frontend/my-actor
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+Create `frontend/my-actor/.env`:
+```dotenv
+VIZCOM_USER=your_vizcom_email
+VIZCOM_PASSWORD=your_vizcom_password
+```
+
+### 5. Run the app
+```bash
+cd frontend
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Key Challenges Solved
+
+### Vizcom has no public API
+The UI was reverse-engineered using Playwright. The tricky parts were handling dynamic React component rendering, intercepting drag-and-drop file uploads via JavaScript injection, and interacting with a contenteditable prompt box instead of a standard input field.
+
+### Finding a free AI image API
+Six different services were evaluated before finding one that worked:
+- Vizcom — paywall on rendering
+- Replicate — removed free tier
+- HuggingFace — dropped image generation support July 2025
+- ModelsLab — requires paid subscription
+- Gemini — billing required for image output
+- **Pollinations.ai** — completely free, no API key, high quality ✅
+
+### dotenv v17 broke standard loading
+The `require("dotenv").config()` pattern stopped working with dotenv v17. Fixed by passing an explicit path: `dotenv.config({ path: require("path").resolve(__dirname, ".env") })`.
+
+### Vercel cannot run Python
+Vercel's serverless functions are Node.js only. The architecture was restructured so Python scripts run locally or on Apify Cloud, while the Next.js API route handles image generation and email directly.
+
+### Apify zip corruption on push
+Pushing the actor with the Python venv included corrupted the zip file. Fixed by adding a `.apifyignore` file to exclude the venv folder before pushing.
+
+---
+
+## What I Learned
+
+- How to automate complex browser interactions on React SPAs with no stable element IDs
+- How to coordinate multiple tools (Mastra MCP + Apify + Arcade.dev) into one working pipeline
+- The fast-changing landscape of AI APIs and how to pivot when services go paid or deprecated
+- Next.js serverless function constraints and how to architect around them
+- Proper secrets management across local, cloud, and CI environments
+
+---
+
+## Roadmap
+
+- [ ] Expand beyond legs: arms, feet, and limb covers
+- [ ] Add live 3D preview in the browser using Three.js
+- [ ] Integrate pricing and order-tracking APIs from manufacturers
+- [ ] Add user accounts to save and revisit past designs
+
+---
+
+## License
+
+MIT License
